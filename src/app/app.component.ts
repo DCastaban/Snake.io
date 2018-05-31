@@ -7,6 +7,7 @@ import { Node } from '../helperClasses/Node';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterContentInit{
+  directionFailsafe: boolean;
   title = 'app';
   canvas : HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -52,6 +53,7 @@ ngAfterContentInit(){
       if((this.now - this.then) > this.interval){
         this.move();
         this.then = this.now - ((this.now - this.then) % this.interval);
+        this.directionFailsafe = true;
       }
       this.ctx.fillStyle = 'red';
       this.ctx.fillRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
@@ -122,18 +124,21 @@ public keyboardInput = (event : KeyboardEvent) => {
       }
     }
     else{
-      if(event.keyCode ===  37 && !(this.direction === 'right')){
-        this.direction = 'left';
+      if(this.directionFailsafe){
+        if(event.keyCode ===  37 && !(this.direction === 'right')){
+          this.direction = 'left';
+        }
+        else if(event.keyCode === 39 && !(this.direction === 'left')){
+          this.direction = 'right';
+        }
+        else if(event.keyCode === 38 && !(this.direction === 'down')){
+          this.direction = 'up';
+        }
+        else if(event.keyCode === 40 && !(this.direction === 'up')){
+          this.direction = 'down';
+        }
       }
-      else if(event.keyCode === 39 && !(this.direction === 'left')){
-        this.direction = 'right';
-      }
-      else if(event.keyCode === 38 && !(this.direction === 'down')){
-        this.direction = 'up';
-      }
-      else if(event.keyCode === 40 && !(this.direction === 'up')){
-        this.direction = 'down';
-      }
+      this.directionFailsafe = false;
     }
  }
  public draw = () => {
@@ -207,7 +212,7 @@ public keyboardInput = (event : KeyboardEvent) => {
  }
  public eatFood = (followers : number) => {
     this.score += 3 * this.multiplier;
-    if(Date.now() - this.multiplierTimer < 2000){ 
+    if(Date.now() - this.multiplierTimer < 3000){ 
       this.multiplier++; 
     }
     else {
