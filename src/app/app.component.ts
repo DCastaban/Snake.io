@@ -123,7 +123,7 @@ public keyboardInput = (event : KeyboardEvent) => {
         this.direction = 'down';
       }
     }
-    else{
+    else{ 
       if(this.directionFailsafe){
         if(event.keyCode ===  37 && !(this.direction === 'right')){
           this.direction = 'left';
