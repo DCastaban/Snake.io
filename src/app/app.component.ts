@@ -101,6 +101,10 @@ public checkForCrash = (x : number, y : number) => {
   if(crash) this.death();
 }
 public death = () => {
+  //Potential try again code:
+  if(window.confirm("You have died! Your score was: " + this.score + " Would you like to play again?")){
+  	this.resetGame();
+  }
   window.cancelAnimationFrame(this.animCancelID);
   alert("You have died! Game Over! Your score was: " + this.score);
   window.cancelAnimationFrame(this.animCancelID);
