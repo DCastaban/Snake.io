@@ -1,0 +1,22 @@
+version: 0.2
+
+env:
+  variables:
+    s3_destination_bucket: "devinsdeviouswebsitetestartifacts"
+
+phases:
+  install:
+    runtime-versions:
+        nodejs: 8
+  build:
+    commands:
+      - echo Entered the build phase...
+      - echo Build started on `date`
+      - echo $CODEBUILD_SRC_DIR
+      - ls
+      - pwd
+artifacts:
+  files: 
+    - '**/*'
+  base-directory: ''
+  discard-paths: no
