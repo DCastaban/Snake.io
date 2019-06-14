@@ -12,6 +12,7 @@ phases:
     commands:
       - echo Entered the build phase...
       - echo Build started on `date`
+      - echo Testing builds linked to commits
       - echo $CODEBUILD_SRC_DIR
       - ls
       - pwd
