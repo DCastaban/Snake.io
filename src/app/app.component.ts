@@ -12,6 +12,7 @@ export class AppComponent implements AfterContentInit{
   canvas : HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   animCancelID : number;
+  deathBool: boolean = false;
   grid: any[];
   direction : string = '';
   leader : Node;
@@ -28,14 +29,19 @@ export class AppComponent implements AfterContentInit{
   constructor(){}
 
 ngAfterContentInit(){
-  this.canvas = <HTMLCanvasElement>document.getElementById('pls');
+  this.canvas = <HTMLCanvasElement>document.getElementById('container');
   document.addEventListener('keydown', this.keyboardInput);
   this.ctx = this.canvas.getContext("2d");
-  this.grid = new Array<number []>(35);
-  for(var i = 0; i < 35; i++){
-    var temp = new Array<number>(25);
+  //each square is 30 or 27
+  //want it to be responsive
+  var gridHeight = Math.floor(window.innerHeight / 27) - 8
+  var gridWidth = Math.floor(window.innerWidth / 27) - 11
+  
+  this.grid = new Array<number []>(gridWidth);
+  for(var i = 0; i < gridWidth; i++){
+    var temp = new Array<number>(gridHeight);
     this.grid[i] = temp;
-    for(var b = 0; b < 25; b++){
+    for(var b = 0; b < gridHeight; b++){
       this.grid[i][b] = 0;
     }
   }
@@ -56,7 +62,7 @@ ngAfterContentInit(){
         this.directionFailsafe = true;
       }
       this.ctx.fillStyle = 'red';
-      this.ctx.fillRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
+      this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
       this.draw();
     }
     this.animCancelID = requestAnimationFrame(() => this.gameLoop());
@@ -102,12 +108,14 @@ public checkForCrash = (x : number, y : number) => {
 }
 public death = () => {
   //Potential try again code:
-  if(window.confirm("You have died! Your score was: " + this.score + " Would you like to play again?")){
-  	this.resetGame();
-  }
+  // this.deathBool = true;
+  // if(window.confirm("You have died! Your score was: " + this.score + " Would you like to play again?")){
+  // 	// this.resetGame();
+  // }
   window.cancelAnimationFrame(this.animCancelID);
   alert("You have died! Game Over! Your score was: " + this.score);
   window.cancelAnimationFrame(this.animCancelID);
+  this.pause = true;
 }
 public keyboardInput = (event : KeyboardEvent) => {
     if(event.keyCode === 32){
