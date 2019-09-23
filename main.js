@@ -41,7 +41,7 @@ module.exports = ""
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<!DOCTYPE html>\r\n<html>\r\n  <body>\r\n    <canvas id ='canvas' class='myCanvas' height = '770vh' width = '1550vw' ></canvas>\r\n  </body>\r\n</html>\r\n"
+module.exports = "<html>\n  <body>\n    <canvas id='container' class='myCanvas' height=\"635\" width=\"1345\"></canvas>\n  </body>\n</html>\n"
 
 /***/ }),
 
@@ -72,6 +72,7 @@ var AppComponent = /** @class */ (function () {
     function AppComponent() {
         var _this = this;
         this.title = 'app';
+        this.deathBool = false;
         this.direction = '';
         this.then = 0;
         this.interval = 100;
@@ -80,7 +81,6 @@ var AppComponent = /** @class */ (function () {
         this.multiplierTimer = Date.now();
         this.pause = false;
         this.canGoOppositeDirection = true;
-        this.crashed = false;
         this.gameLoop = function () {
             if (!_this.pause) {
                 _this.now = Date.now();
@@ -90,7 +90,7 @@ var AppComponent = /** @class */ (function () {
                     _this.directionFailsafe = true;
                 }
                 _this.ctx.fillStyle = 'red';
-                _this.ctx.fillRect(0, 0, document.documentElement.clientWidth, document.documentElement.clientHeight);
+                _this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
                 _this.draw();
             }
             _this.animCancelID = requestAnimationFrame(function () { return _this.gameLoop(); });
@@ -136,16 +136,14 @@ var AppComponent = /** @class */ (function () {
         };
         this.death = function () {
             //Potential try again code:
-            if (_this.crashed == false) {
-                // if(window.confirm("You have died! Your score was: " + this.score + " Would you like to play again?")){
-                //   this.resetGame();
-                // }
-                window.cancelAnimationFrame(_this.animCancelID);
-                alert("You have died! Game Over! Your score was: " + _this.score);
-                //window.cancelAnimationFrame(this.animCancelID);
-                _this.crashed = true;
-                setTimeout(function () { }, 100000000000000000000000000000);
-            }
+            // this.deathBool = true;
+            // if(window.confirm("You have died! Your score was: " + this.score + " Would you like to play again?")){
+            // 	// this.resetGame();
+            // }
+            window.cancelAnimationFrame(_this.animCancelID);
+            alert("You have died! Game Over! Your score was: " + _this.score);
+            window.cancelAnimationFrame(_this.animCancelID);
+            _this.pause = true;
         };
         this.keyboardInput = function (event) {
             if (event.keyCode === 32) {
@@ -189,15 +187,15 @@ var AppComponent = /** @class */ (function () {
                 for (var b = 0; b < _this.grid[i].length; b++) {
                     if (_this.grid[i][b] === 1) {
                         _this.ctx.fillStyle = 'yellow';
-                        _this.ctx.fillRect(i * _this.width / 45 + _this.width / 10, b * _this.height / 35 + _this.height / 11, _this.width / 50, _this.height / 40);
+                        _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 27, 27);
                     }
                     else if (_this.grid[i][b] === 0) {
                         _this.ctx.fillStyle = 'blue';
-                        _this.drawRect(i, b);
+                        _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 30, 30);
                     }
                     else if (_this.grid[i][b] === 3) {
                         _this.ctx.fillStyle = 'red';
-                        _this.ctx.fillRect(i * _this.width / 45 + _this.width / 10, b * _this.height / 35 + _this.height / 11, _this.width / 50, _this.height / 40);
+                        _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 27, 27);
                     }
                 }
             }
@@ -210,12 +208,9 @@ var AppComponent = /** @class */ (function () {
             for (var i = 0; i < _this.grid.length; i++) {
                 for (var b = 0; b < _this.grid[i].length; b++) {
                     _this.ctx.fillStyle = 'blue';
-                    _this.drawRect(i, b);
+                    _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 30, 30);
                 }
             }
-        };
-        this.drawRect = function (i, b) {
-            _this.ctx.fillRect(i * _this.width / 45 + _this.width / 10, b * _this.height / 35 + _this.height / 11, _this.width / 45, _this.height / 35);
         };
         this.moveSnake = function () {
             if (_this.leader.next == null)
@@ -350,18 +345,18 @@ var AppComponent = /** @class */ (function () {
         };
     }
     AppComponent.prototype.ngAfterContentInit = function () {
-        this.canvas = document.getElementById('canvas');
-        this.height = this.canvas.height;
-        this.width = this.canvas.width;
+        this.canvas = document.getElementById('container');
         document.addEventListener('keydown', this.keyboardInput);
         this.ctx = this.canvas.getContext("2d");
-        var height = Math.round(this.height / 28);
-        var width = Math.round(this.width / 43);
-        this.grid = new Array(width);
-        for (var i = 0; i < width; i++) {
-            var temp = new Array(height);
+        //each square is 30 or 27
+        //want it to be responsive
+        var gridHeight = Math.floor(window.innerHeight / 27) - 8;
+        var gridWidth = Math.floor(window.innerWidth / 27) - 11;
+        this.grid = new Array(gridWidth);
+        for (var i = 0; i < gridWidth; i++) {
+            var temp = new Array(gridHeight);
             this.grid[i] = temp;
-            for (var b = 0; b < height; b++) {
+            for (var b = 0; b < gridHeight; b++) {
                 this.grid[i][b] = 0;
             }
         }
@@ -532,7 +527,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\Devin\PersonalProjects\Snake.io\src\main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! /Users/devin/Documents/personalProjects/Snake.io/src/main.ts */"./src/main.ts");
 
 
 /***/ })
