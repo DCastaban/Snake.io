@@ -25,8 +25,23 @@ export class AppComponent implements AfterContentInit{
   multiplierTimer: number = Date.now();
   pause : boolean = false;
   canGoOppositeDirection : boolean = true;
+  highscore : number = null;
   
-  constructor(){}
+  constructor(){
+    // Get the highscore from public s3 bucket
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = () => { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+            this.highscoreGetCallback(xmlHttp.response);
+        }
+    }
+    xmlHttp.open("GET", "https://snakehighscore.s3.amazonaws.com/highscore.json", true); // true for asynchronous 
+    xmlHttp.send(null);
+  }
+
+  private highscoreGetCallback = (response) => {
+    this.highscore = JSON.parse(response)['highscore'];
+  }
 
 ngAfterContentInit(){
   this.canvas = <HTMLCanvasElement>document.getElementById('container');
@@ -53,7 +68,7 @@ ngAfterContentInit(){
   }
 
   
- public gameLoop = () => {
+ private gameLoop = () => {
     if(!this.pause){
       this.now = Date.now();
       if((this.now - this.then) > this.interval){
@@ -68,7 +83,7 @@ ngAfterContentInit(){
     this.animCancelID = requestAnimationFrame(() => this.gameLoop());
  }
 
-public move = () => {
+private move = () => {
  if(this.direction === 'left'){
   this.moveLeader(this.leader.x - 1, this.leader.y);
  }
@@ -83,7 +98,7 @@ public move = () => {
  }
 }
 
-public moveLeader = (x : number, y : number) => {
+private moveLeader = (x : number, y : number) => {
   if(x > this.grid.length - 1 || x < 0
   || y > this.grid[0].length - 1 || y < 0){
     this.death();
@@ -97,7 +112,7 @@ public moveLeader = (x : number, y : number) => {
   this.leader.y = y;
   this.setSnake();
 }
-public checkForCrash = (x : number, y : number) => {
+private checkForCrash = (x : number, y : number) => {
   let curr = this.leader;
   let crash = false;
   while(!(curr == null)){
@@ -106,7 +121,7 @@ public checkForCrash = (x : number, y : number) => {
   }
   if(crash) this.death();
 }
-public death = () => {
+private death = () => {
   //Potential try again code:
   // this.deathBool = true;
   // if(window.confirm("You have died! Your score was: " + this.score + " Would you like to play again?")){
@@ -117,7 +132,7 @@ public death = () => {
   window.cancelAnimationFrame(this.animCancelID);
   this.pause = true;
 }
-public keyboardInput = (event : KeyboardEvent) => {
+private keyboardInput = (event : KeyboardEvent) => {
     if(event.keyCode === 32){
       this.pause = !this.pause;
     }
@@ -153,7 +168,7 @@ public keyboardInput = (event : KeyboardEvent) => {
       this.directionFailsafe = false;
     }
  }
- public draw = () => {
+ private draw = () => {
   this.paintItBlue();
   for(var i = 0; i < this.grid.length; i++){
     for(var b = 0; b < this.grid[i].length; b++){
@@ -176,7 +191,7 @@ public keyboardInput = (event : KeyboardEvent) => {
   this.ctx.fillText("Score: " + this.score, 10, 30); 
   this.ctx.fillText("Multiplier: " + this.multiplier + "x", 10, 60); 
  }
- public paintItBlue = () => {
+ private paintItBlue = () => {
    for(var i = 0; i < this.grid.length; i++){
      for(var b = 0; b < this.grid[i].length; b++){
        this.ctx.fillStyle = 'blue';
@@ -184,7 +199,7 @@ public keyboardInput = (event : KeyboardEvent) => {
      }
    }
  }
- public moveSnake = () => {
+ private moveSnake = () => {
    if(this.leader.next == null) return;
    //Sets curr to the node after the leader
    let curr = this.leader.next;
@@ -203,14 +218,14 @@ public keyboardInput = (event : KeyboardEvent) => {
    }
    curr.data = prevData;
  }
- public setSnake = () => {
+ private setSnake = () => {
    let curr = this.leader;
    while(!(curr == null)){
      this.grid[curr.x][curr.y] = 1;
      curr = curr.next;
    }
  }
- public checkEat = () => {
+ private checkEat = () => {
    let curr = this.leader;
    let foodNotEaten = true;
    while((!(curr == null)) && foodNotEaten){
@@ -222,8 +237,9 @@ public keyboardInput = (event : KeyboardEvent) => {
      this.grid[this.food[0]][this.food[1]] = 3;
    }
  }
- public eatFood = (followers : number) => {
+ private eatFood = (followers : number) => {
     this.score += 3 * this.multiplier;
+    this.checkForHighscore()
     if(Date.now() - this.multiplierTimer < 3000){ 
       this.multiplier++; 
     }
@@ -264,7 +280,8 @@ public keyboardInput = (event : KeyboardEvent) => {
     
 
  }
- public firstMeal = () => {
+
+ private firstMeal = () => {
    if(this.direction === 'left'){
      this.leader.next = new Node([this.leader.x + 1, this.leader.y]);
    }
@@ -280,18 +297,18 @@ public keyboardInput = (event : KeyboardEvent) => {
    this.canGoOppositeDirection = false;
    this.eatFood(2);
  }
- public checkNearBounds = () => {
+ private checkNearBounds = () => {
    //Check if the snake is near the bound and if it is,
    //add to the end of snake in a different way.
  }
- public resetGrid = () => {
+ private resetGrid = () => {
   for(var i = 0; i < this.grid.length; i++){
     for(var b = 0; b < this.grid[i].length; b++){
       this.grid[i][b] = 0;
     }
   }
  }
- public resetFood = () => {
+ privatge resetFood = () => {
   if(!(this.food == undefined)) { 
     this.grid[this.food[0]][this.food[1]] = 0; 
   }
@@ -301,12 +318,10 @@ public keyboardInput = (event : KeyboardEvent) => {
     this.food = [Math.floor(Math.random() * (this.grid.length )),
       Math.floor(Math.random() * (this.grid[0].length))];
   }
-  //Need to implement what if food spawns in snake?
-  console.log("This is the grid:" + this.grid);
-  console.log("this is food:" + this.food); 
+  //Need to implement what if food spawns in snake? TODO
   this.grid[this.food[0]][this.food[1]] = 3;
  }
- public foodInSnake = () : boolean => {
+ private foodInSnake = () : boolean => {
    let curr = this.leader;
    let foodInSnake = false;
    while(!(curr == null) && !foodInSnake){
