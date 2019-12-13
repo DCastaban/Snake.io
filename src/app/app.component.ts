@@ -26,6 +26,7 @@ export class AppComponent implements AfterContentInit{
   pause : boolean = false;
   canGoOppositeDirection : boolean = true;
   highscore : number = null;
+  beatenHighscore : boolean = false;
   
   constructor(){
     // Get the highscore from public s3 bucket
@@ -190,6 +191,7 @@ private keyboardInput = (event : KeyboardEvent) => {
   this.ctx.fillStyle = "white";
   this.ctx.fillText("Score: " + this.score, 10, 30); 
   this.ctx.fillText("Multiplier: " + this.multiplier + "x", 10, 60); 
+  this.ctx.fillText("Highscore: " + this.highscore, -10, 30); 
  }
  private paintItBlue = () => {
    for(var i = 0; i < this.grid.length; i++){
@@ -280,6 +282,13 @@ private keyboardInput = (event : KeyboardEvent) => {
     
 
  }
+ 
+ private checkForHighscore(){
+     if(this.score > this.highscore){
+         this.highscore = this.score;
+         this.beatenHighscore = true;
+     }
+ }
 
  private firstMeal = () => {
    if(this.direction === 'left'){
@@ -308,7 +317,7 @@ private keyboardInput = (event : KeyboardEvent) => {
     }
   }
  }
- privatge resetFood = () => {
+ private resetFood = () => {
   if(!(this.food == undefined)) { 
     this.grid[this.food[0]][this.food[1]] = 0; 
   }
