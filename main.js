@@ -81,6 +81,13 @@ var AppComponent = /** @class */ (function () {
         this.multiplierTimer = Date.now();
         this.pause = false;
         this.canGoOppositeDirection = true;
+        this.highscore = "loading...";
+        this.highscoreColour = "white";
+        this.highscoreColourChange = true;
+        this.beatenHighscore = false;
+        this.highscoreGetCallback = function (response) {
+            _this.highscore = JSON.parse(response)['highscore'];
+        };
         this.gameLoop = function () {
             if (!_this.pause) {
                 _this.now = Date.now();
@@ -203,6 +210,7 @@ var AppComponent = /** @class */ (function () {
             _this.ctx.fillStyle = "white";
             _this.ctx.fillText("Score: " + _this.score, 10, 30);
             _this.ctx.fillText("Multiplier: " + _this.multiplier + "x", 10, 60);
+            _this.paintHighscore();
         };
         this.paintItBlue = function () {
             for (var i = 0; i < _this.grid.length; i++) {
@@ -255,6 +263,7 @@ var AppComponent = /** @class */ (function () {
         };
         this.eatFood = function (followers) {
             _this.score += 3 * _this.multiplier;
+            _this.checkForHighscore();
             if (Date.now() - _this.multiplierTimer < 3000) {
                 _this.multiplier++;
             }
@@ -327,9 +336,7 @@ var AppComponent = /** @class */ (function () {
                 _this.food = [Math.floor(Math.random() * (_this.grid.length)),
                     Math.floor(Math.random() * (_this.grid[0].length))];
             }
-            //Need to implement what if food spawns in snake?
-            console.log("This is the grid:" + _this.grid);
-            console.log("this is food:" + _this.food);
+            //Need to implement what if food spawns in snake? TODO
             _this.grid[_this.food[0]][_this.food[1]] = 3;
         };
         this.foodInSnake = function () {
@@ -343,6 +350,15 @@ var AppComponent = /** @class */ (function () {
             }
             return foodInSnake;
         };
+        // Get the highscore from public s3 bucket
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                _this.highscoreGetCallback(xmlHttp.response);
+            }
+        };
+        xmlHttp.open("GET", "https://ubu6p7l7be.execute-api.us-east-1.amazonaws.com/Production/gethighscore", true); // true for asynchronous 
+        xmlHttp.send(null);
     }
     AppComponent.prototype.ngAfterContentInit = function () {
         this.canvas = document.getElementById('container');
@@ -365,6 +381,42 @@ var AppComponent = /** @class */ (function () {
         this.resetFood();
         this.grid[this.leader.x][this.leader.y] = 1;
         this.gameLoop();
+    };
+    AppComponent.prototype.paintHighscore = function () {
+        var _this = this;
+        if (this.beatenHighscore) {
+            // Congratulate with random colours!
+            this.updateHighscore();
+            this.highscore = this.score;
+            this.ctx.fillStyle = this.highscoreColour;
+            if (this.highscoreColourChange) {
+                this.highscoreColour = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+                this.highscoreColourChange = false;
+                setTimeout(function () {
+                    _this.highscoreColourChange = true;
+                }, 100);
+            }
+        }
+        this.ctx.font = "40px Times New Roman";
+        this.ctx.fillText("Global Highscore: " + this.highscore, window.innerWidth - window.innerWidth * 0.6, 55);
+        var highscoreText = "Global Highscore: " + this.highscore;
+        var textLength = this.ctx.measureText(highscoreText);
+        this.ctx.fillRect(window.innerWidth - window.innerWidth * 0.6, 65, textLength.width, 5);
+    };
+    AppComponent.prototype.updateHighscore = function () {
+        var url = "https://ubu6p7l7be.execute-api.us-east-1.amazonaws.com/Production/updatehighscore?highscore=" + this.score;
+        // create a new XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        // open the request with the verb and the url
+        xhr.open('PUT', url);
+        // send the request
+        xhr.send();
+    };
+    AppComponent.prototype.checkForHighscore = function () {
+        if (this.score > this.highscore) {
+            this.highscore = this.score;
+            this.beatenHighscore = true;
+        }
     };
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
