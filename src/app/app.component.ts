@@ -25,7 +25,9 @@ export class AppComponent implements AfterContentInit{
   multiplierTimer: number = Date.now();
   pause : boolean = false;
   canGoOppositeDirection : boolean = true;
-  highscore : number = null;
+  highscore : any = "loading...";
+  highscoreColour: string = "white";
+  highscoreColourChange: boolean = true;
   beatenHighscore : boolean = false;
   
   constructor(){
@@ -36,7 +38,7 @@ export class AppComponent implements AfterContentInit{
             this.highscoreGetCallback(xmlHttp.response);
         }
     }
-    xmlHttp.open("GET", "https://snakehighscore.s3.amazonaws.com/highscore.json", true); // true for asynchronous 
+    xmlHttp.open("GET", "https://ubu6p7l7be.execute-api.us-east-1.amazonaws.com/Production/gethighscore", true); // true for asynchronous 
     xmlHttp.send(null);
   }
 
@@ -191,7 +193,36 @@ private keyboardInput = (event : KeyboardEvent) => {
   this.ctx.fillStyle = "white";
   this.ctx.fillText("Score: " + this.score, 10, 30); 
   this.ctx.fillText("Multiplier: " + this.multiplier + "x", 10, 60); 
-  this.ctx.fillText("Highscore: " + this.highscore, -10, 30); 
+  this.paintHighscore();
+ }
+ private paintHighscore(){
+  if(this.beatenHighscore){
+    // Congratulate with random colours!
+    this.updateHighscore();
+    this.highscore = this.score;
+    this.ctx.fillStyle = this.highscoreColour;
+    if(this.highscoreColourChange){
+      this.highscoreColour = "#"+((1<<24)*Math.random()|0).toString(16);
+      this.highscoreColourChange = false;
+      setTimeout(() => {
+        this.highscoreColourChange = true;
+      }, 100)
+    }
+  }
+  this.ctx.font = "40px Times New Roman";
+  this.ctx.fillText("Global Highscore: " + this.highscore, window.innerWidth - window.innerWidth * 0.6, 55); 
+  var highscoreText = "Global Highscore: " + this.highscore;
+  var textLength = this.ctx.measureText(highscoreText);
+  this.ctx.fillRect(window.innerWidth - window.innerWidth * 0.6, 65, textLength.width, 5);
+ }
+ private updateHighscore(){
+  var url = "https://ubu6p7l7be.execute-api.us-east-1.amazonaws.com/Production/updatehighscore?highscore=" + this.score;
+  // create a new XMLHttpRequest
+  var xhr = new XMLHttpRequest();
+  // open the request with the verb and the url
+  xhr.open('PUT', url);
+  // send the request
+  xhr.send();
  }
  private paintItBlue = () => {
    for(var i = 0; i < this.grid.length; i++){
