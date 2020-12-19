@@ -52,7 +52,7 @@ ngAfterContentInit(){
   this.ctx = this.canvas.getContext("2d");
   //each square is 30 or 27
   //want it to be responsive
-  var gridHeight = Math.floor(window.innerHeight / 27) - 8
+  var gridHeight = Math.floor(window.innerHeight / 30) - 8
   var gridWidth = Math.floor(window.innerWidth / 27) - 11
   
   this.grid = new Array<number []>(gridWidth);
@@ -140,31 +140,31 @@ private keyboardInput = (event : KeyboardEvent) => {
       this.pause = !this.pause;
     }
     else if(this.canGoOppositeDirection){
-      if(event.keyCode ===  37){
+      if(event.keyCode ===  <number>37 || event.keyCode === <number>65){
         this.direction = 'left';
       }
-      else if(event.keyCode === 39){
+      else if(event.keyCode === <number>39 || event.keyCode === <number>68){
         this.direction = 'right';
       }
-      else if(event.keyCode === 38){
+      else if(event.keyCode === <number>38 || event.keyCode === <number>87){
         this.direction = 'up';
       }
-      else if(event.keyCode === 40){
+      else if(event.keyCode === <number>40 || event.keyCode === <number>83){
         this.direction = 'down';
       }
     }
     else{ 
       if(this.directionFailsafe){
-        if(event.keyCode ===  37 && !(this.direction === 'right')){
+        if(event.keyCode ===  <number>37 || event.keyCode === <number>65 && !(this.direction === 'right')){
           this.direction = 'left';
         }
-        else if(event.keyCode === 39 && !(this.direction === 'left')){
+        else if(event.keyCode === <number>39 || event.keyCode === <number>68 && !(this.direction === 'left')){
           this.direction = 'right';
         }
-        else if(event.keyCode === 38 && !(this.direction === 'down')){
+        else if(event.keyCode === <number>38 || event.keyCode === <number>87 && !(this.direction === 'down')){
           this.direction = 'up';
         }
-        else if(event.keyCode === 40 && !(this.direction === 'up')){
+        else if(event.keyCode === <number>40 || event.keyCode === <number>83 && !(this.direction === 'up')){
           this.direction = 'down';
         }
       }
