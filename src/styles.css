@@ -1,1 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+.myCanvas {
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+body {
+    margin:0 !important;
+    padding:0 !important;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    background-color: red;
+}

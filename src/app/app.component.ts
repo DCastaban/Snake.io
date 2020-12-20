@@ -29,6 +29,10 @@ export class AppComponent implements AfterContentInit{
   highscoreColour: string = "white";
   highscoreColourChange: boolean = true;
   beatenHighscore : boolean = false;
+  boxSize : number = 27;
+  boxSpacing : number = 3;
+  widthPadding : number = 0;
+  heightPadding : number = 0;
   
   constructor(){
     // Get the highscore from public s3 bucket
@@ -48,17 +52,19 @@ export class AppComponent implements AfterContentInit{
 
 ngAfterContentInit(){
   this.canvas = <HTMLCanvasElement>document.getElementById('container');
+  this.canvas.height = window.innerHeight - this.heightPadding;
+  this.canvas.width = window.innerWidth - this.widthPadding;
   document.addEventListener('keydown', this.keyboardInput);
   this.ctx = this.canvas.getContext("2d");
   //each square is 30 or 27
   //want it to be responsive
-  var gridHeight = Math.floor(window.innerHeight / 30) - 8
-  var gridWidth = Math.floor(window.innerWidth / 27) - 11
+  var gridHeight = Math.floor(window.innerHeight / this.boxSize) - 8
+  var gridWidth = Math.floor(window.innerWidth / this.boxSize) - 11
   
   this.grid = new Array<number []>(gridWidth);
   for(var i = 0; i < gridWidth; i++){
-    var temp = new Array<number>(gridHeight);
-    this.grid[i] = temp;
+    var row = new Array<number>(gridHeight);
+    this.grid[i] = row;
     for(var b = 0; b < gridHeight; b++){
       this.grid[i][b] = 0;
     }
@@ -68,7 +74,7 @@ ngAfterContentInit(){
   this.resetFood();
   this.grid[this.leader.x][this.leader.y] = 1;
   this.gameLoop();
-  }
+}
 
   
  private gameLoop = () => {
@@ -80,7 +86,10 @@ ngAfterContentInit(){
         this.directionFailsafe = true;
       }
       this.ctx.fillStyle = 'red';
-      this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      this.ctx.width = window.innerWidth - this.widthPadding;
+      this.ctx.height = window.innerHeight - this.heightPadding + 10;
+      this.ctx.style = "background-color: red";
+      this.ctx.fillRect(0, 0, this.ctx.width, this.ctx.height);
       this.draw();
     }
     this.animCancelID = requestAnimationFrame(() => this.gameLoop());
@@ -155,16 +164,16 @@ private keyboardInput = (event : KeyboardEvent) => {
     }
     else{ 
       if(this.directionFailsafe){
-        if(event.keyCode ===  <number>37 || event.keyCode === <number>65 && !(this.direction === 'right')){
+        if((event.keyCode ===  <number>37 || event.keyCode === <number>65) && !(this.direction === 'right')){
           this.direction = 'left';
         }
-        else if(event.keyCode === <number>39 || event.keyCode === <number>68 && !(this.direction === 'left')){
+        else if((event.keyCode === <number>39 || event.keyCode === <number>68) && !(this.direction === 'left')){
           this.direction = 'right';
         }
-        else if(event.keyCode === <number>38 || event.keyCode === <number>87 && !(this.direction === 'down')){
+        else if((event.keyCode === <number>38 || event.keyCode === <number>87) && !(this.direction === 'down')){
           this.direction = 'up';
         }
-        else if(event.keyCode === <number>40 || event.keyCode === <number>83 && !(this.direction === 'up')){
+        else if((event.keyCode === <number>40 || event.keyCode === <number>83) && !(this.direction === 'up')){
           this.direction = 'down';
         }
       }
@@ -177,16 +186,27 @@ private keyboardInput = (event : KeyboardEvent) => {
     for(var b = 0; b < this.grid[i].length; b++){
       if(this.grid[i][b] === 1){
         this.ctx.fillStyle = 'yellow';
-        this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 27, 27);
-      }
-      else if(this.grid[i][b] === 0){
-        this.ctx.fillStyle = 'blue';
-        this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 30, 30);
+        this.ctx.fillRect(i * (this.boxSize + this.boxSpacing) + 100, // X value
+          b * (this.boxSize + this.boxSpacing) + 80, // Y value
+          this.boxSize , // length
+          this.boxSize); // width
       }
       else if(this.grid[i][b] === 3){
         this.ctx.fillStyle = 'red';
-        this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 27, 27);
+        this.ctx.fillRect(i * (this.boxSize + this.boxSpacing) + 100, // X value
+          b * (this.boxSize + this.boxSpacing) + 80, // Y value
+          this.boxSize , // length
+          this.boxSize); // width
       }
+
+      else if(this.grid[i][b] === 0){
+        this.ctx.fillStyle = 'blue';
+        this.ctx.fillRect(i * (this.boxSize + this.boxSpacing) + 100, // X value
+          b * (this.boxSize + this.boxSpacing) + 80, // Y value
+          this.boxSize + this.boxSpacing, // length
+          this.boxSize + this.boxSpacing); // width
+      }
+
     }
   }
   this.ctx.font = "20px Times New Roman";
@@ -228,7 +248,10 @@ private keyboardInput = (event : KeyboardEvent) => {
    for(var i = 0; i < this.grid.length; i++){
      for(var b = 0; b < this.grid[i].length; b++){
        this.ctx.fillStyle = 'blue';
-       this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 30, 30);
+       this.ctx.fillRect(i * this.boxSize + 100 + this.boxSpacing * i, 
+        b * (this.boxSize + this.boxSpacing) + 80, 
+        this.boxSize + this.boxSpacing, 
+        this.boxSize + this.boxSpacing);
      }
    }
  }
