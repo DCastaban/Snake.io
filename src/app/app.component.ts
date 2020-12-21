@@ -29,7 +29,8 @@ export class AppComponent implements AfterContentInit{
   highscoreColour: string = "white";
   highscoreColourChange: boolean = true;
   beatenHighscore : boolean = false;
-  boxSize : number = 27;
+  boxSize : number = window.innerHeight * 0.04538577912 < window.innerWidth * 0.02196193265 ? 
+    window.innerHeight * 0.04538577912 : window.innerWidth * 0.02196193265;
   boxSpacing : number = 3;
   widthPadding : number = 0;
   heightPadding : number = 0;
@@ -86,10 +87,7 @@ ngAfterContentInit(){
         this.directionFailsafe = true;
       }
       this.ctx.fillStyle = 'red';
-      this.ctx.width = window.innerWidth - this.widthPadding;
-      this.ctx.height = window.innerHeight - this.heightPadding + 10;
-      this.ctx.style = "background-color: red";
-      this.ctx.fillRect(0, 0, this.ctx.width, this.ctx.height);
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.draw();
     }
     this.animCancelID = requestAnimationFrame(() => this.gameLoop());
