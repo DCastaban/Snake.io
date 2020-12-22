@@ -22,15 +22,15 @@ export class AppComponent implements AfterContentInit{
   food : number[];
   score : number = 0;
   multiplier: number = 1;
-  multiplierTimer: number = Date.now();
+  multiplierTimer : number = Date.now();
+  multiplierExpiry : number = 3000;
   pause : boolean = false;
   canGoOppositeDirection : boolean = true;
   highscore : any = "loading...";
   highscoreColour: string = "white";
   highscoreColourChange: boolean = true;
   beatenHighscore : boolean = false;
-  boxSize : number = window.innerHeight * 0.04538577912 < window.innerWidth * 0.02196193265 ? 
-    window.innerHeight * 0.04538577912 : window.innerWidth * 0.02196193265;
+  boxSize : number = Math.max(window.innerHeight * 0.04538577912, window.innerWidth * 0.02196193265);
   boxSpacing : number = 3;
   widthPadding : number = 0;
   heightPadding : number = 0;
@@ -294,7 +294,8 @@ private keyboardInput = (event : KeyboardEvent) => {
  private eatFood = (followers : number) => {
     this.score += 3 * this.multiplier;
     this.checkForHighscore()
-    if(Date.now() - this.multiplierTimer < 3000){ 
+    let timeElapsed = Date.now() - this.multiplierTimer;
+    if(timeElapsed < this.multiplierExpiry){ 
       this.multiplier++; 
     }
     else {
@@ -381,7 +382,12 @@ private keyboardInput = (event : KeyboardEvent) => {
   }
   //Need to implement what if food spawns in snake? TODO
   this.grid[this.food[0]][this.food[1]] = 3;
+  // Set multiplier timer expiry to be a function of the euclidean distance
+  let xdistance = Math.abs(this.food[0] - this.leader.x);
+  let ydistance = Math.abs(this.food[1] - this.leader.y);
+  this.multiplierExpiry = xdistance * 220 + ydistance * 220 + 300;
  }
+
  private foodInSnake = () : boolean => {
    let curr = this.leader;
    let foodInSnake = false;
