@@ -7,7 +7,7 @@
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/* You can add global styles to this file, and also import other style files */\n"
+module.exports = "/* You can add global styles to this file, and also import other style files */\n.myCanvas {\n    overflow-y: hidden;\n    overflow-x: hidden;\n}\nbody {\n    margin:0 !important;\n    padding:0 !important;\n    overflow-y: hidden;\n    overflow-x: hidden;\n    background-color: red;\n}"
 
 /***/ }),
 

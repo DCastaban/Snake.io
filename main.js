@@ -41,7 +41,7 @@ module.exports = ""
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<html>\n  <body>\n    <canvas id='container' class='myCanvas' height=\"635\" width=\"1345\"></canvas>\n  </body>\n</html>\n"
+module.exports = "<html>\n  <body>\n    <canvas id='container' class='myCanvas'></canvas>\n  </body>\n</html>\n"
 
 /***/ }),
 
@@ -79,12 +79,17 @@ var AppComponent = /** @class */ (function () {
         this.score = 0;
         this.multiplier = 1;
         this.multiplierTimer = Date.now();
+        this.multiplierExpiry = 3000;
         this.pause = false;
         this.canGoOppositeDirection = true;
         this.highscore = "loading...";
         this.highscoreColour = "white";
         this.highscoreColourChange = true;
         this.beatenHighscore = false;
+        this.boxSize = Math.max(window.innerHeight * 0.04538577912, window.innerWidth * 0.02196193265);
+        this.boxSpacing = 3;
+        this.widthPadding = 0;
+        this.heightPadding = 0;
         this.highscoreGetCallback = function (response) {
             _this.highscore = JSON.parse(response)['highscore'];
         };
@@ -97,7 +102,7 @@ var AppComponent = /** @class */ (function () {
                     _this.directionFailsafe = true;
                 }
                 _this.ctx.fillStyle = 'red';
-                _this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+                _this.ctx.fillRect(0, 0, _this.canvas.width, _this.canvas.height);
                 _this.draw();
             }
             _this.animCancelID = requestAnimationFrame(function () { return _this.gameLoop(); });
@@ -157,31 +162,31 @@ var AppComponent = /** @class */ (function () {
                 _this.pause = !_this.pause;
             }
             else if (_this.canGoOppositeDirection) {
-                if (event.keyCode === 37) {
+                if (event.keyCode === 37 || event.keyCode === 65) {
                     _this.direction = 'left';
                 }
-                else if (event.keyCode === 39) {
+                else if (event.keyCode === 39 || event.keyCode === 68) {
                     _this.direction = 'right';
                 }
-                else if (event.keyCode === 38) {
+                else if (event.keyCode === 38 || event.keyCode === 87) {
                     _this.direction = 'up';
                 }
-                else if (event.keyCode === 40) {
+                else if (event.keyCode === 40 || event.keyCode === 83) {
                     _this.direction = 'down';
                 }
             }
             else {
                 if (_this.directionFailsafe) {
-                    if (event.keyCode === 37 && !(_this.direction === 'right')) {
+                    if ((event.keyCode === 37 || event.keyCode === 65) && !(_this.direction === 'right')) {
                         _this.direction = 'left';
                     }
-                    else if (event.keyCode === 39 && !(_this.direction === 'left')) {
+                    else if ((event.keyCode === 39 || event.keyCode === 68) && !(_this.direction === 'left')) {
                         _this.direction = 'right';
                     }
-                    else if (event.keyCode === 38 && !(_this.direction === 'down')) {
+                    else if ((event.keyCode === 38 || event.keyCode === 87) && !(_this.direction === 'down')) {
                         _this.direction = 'up';
                     }
-                    else if (event.keyCode === 40 && !(_this.direction === 'up')) {
+                    else if ((event.keyCode === 40 || event.keyCode === 83) && !(_this.direction === 'up')) {
                         _this.direction = 'down';
                     }
                 }
@@ -194,15 +199,24 @@ var AppComponent = /** @class */ (function () {
                 for (var b = 0; b < _this.grid[i].length; b++) {
                     if (_this.grid[i][b] === 1) {
                         _this.ctx.fillStyle = 'yellow';
-                        _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 27, 27);
-                    }
-                    else if (_this.grid[i][b] === 0) {
-                        _this.ctx.fillStyle = 'blue';
-                        _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 30, 30);
+                        _this.ctx.fillRect(i * (_this.boxSize + _this.boxSpacing) + 100, // X value
+                        b * (_this.boxSize + _this.boxSpacing) + 80, // Y value
+                        _this.boxSize, // length
+                        _this.boxSize); // width
                     }
                     else if (_this.grid[i][b] === 3) {
                         _this.ctx.fillStyle = 'red';
-                        _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 27, 27);
+                        _this.ctx.fillRect(i * (_this.boxSize + _this.boxSpacing) + 100, // X value
+                        b * (_this.boxSize + _this.boxSpacing) + 80, // Y value
+                        _this.boxSize, // length
+                        _this.boxSize); // width
+                    }
+                    else if (_this.grid[i][b] === 0) {
+                        _this.ctx.fillStyle = 'blue';
+                        _this.ctx.fillRect(i * (_this.boxSize + _this.boxSpacing) + 100, // X value
+                        b * (_this.boxSize + _this.boxSpacing) + 80, // Y value
+                        _this.boxSize + _this.boxSpacing, // length
+                        _this.boxSize + _this.boxSpacing); // width
                     }
                 }
             }
@@ -216,7 +230,7 @@ var AppComponent = /** @class */ (function () {
             for (var i = 0; i < _this.grid.length; i++) {
                 for (var b = 0; b < _this.grid[i].length; b++) {
                     _this.ctx.fillStyle = 'blue';
-                    _this.ctx.fillRect(i * 30 + 100, b * 30 + 80, 30, 30);
+                    _this.ctx.fillRect(i * _this.boxSize + 100 + _this.boxSpacing * i, b * (_this.boxSize + _this.boxSpacing) + 80, _this.boxSize + _this.boxSpacing, _this.boxSize + _this.boxSpacing);
                 }
             }
         };
@@ -264,7 +278,8 @@ var AppComponent = /** @class */ (function () {
         this.eatFood = function (followers) {
             _this.score += 3 * _this.multiplier;
             _this.checkForHighscore();
-            if (Date.now() - _this.multiplierTimer < 3000) {
+            var timeElapsed = Date.now() - _this.multiplierTimer;
+            if (timeElapsed < _this.multiplierExpiry) {
                 _this.multiplier++;
             }
             else {
@@ -338,6 +353,10 @@ var AppComponent = /** @class */ (function () {
             }
             //Need to implement what if food spawns in snake? TODO
             _this.grid[_this.food[0]][_this.food[1]] = 3;
+            // Set multiplier timer expiry to be a function of the euclidean distance
+            var xdistance = Math.abs(_this.food[0] - _this.leader.x);
+            var ydistance = Math.abs(_this.food[1] - _this.leader.y);
+            _this.multiplierExpiry = xdistance * 220 + ydistance * 220 + 300;
         };
         this.foodInSnake = function () {
             var curr = _this.leader;
@@ -362,16 +381,18 @@ var AppComponent = /** @class */ (function () {
     }
     AppComponent.prototype.ngAfterContentInit = function () {
         this.canvas = document.getElementById('container');
+        this.canvas.height = window.innerHeight - this.heightPadding;
+        this.canvas.width = window.innerWidth - this.widthPadding;
         document.addEventListener('keydown', this.keyboardInput);
         this.ctx = this.canvas.getContext("2d");
         //each square is 30 or 27
         //want it to be responsive
-        var gridHeight = Math.floor(window.innerHeight / 27) - 8;
-        var gridWidth = Math.floor(window.innerWidth / 27) - 11;
+        var gridHeight = Math.floor(window.innerHeight / this.boxSize) - 8;
+        var gridWidth = Math.floor(window.innerWidth / this.boxSize) - 11;
         this.grid = new Array(gridWidth);
         for (var i = 0; i < gridWidth; i++) {
-            var temp = new Array(gridHeight);
-            this.grid[i] = temp;
+            var row = new Array(gridHeight);
+            this.grid[i] = row;
             for (var b = 0; b < gridHeight; b++) {
                 this.grid[i][b] = 0;
             }
