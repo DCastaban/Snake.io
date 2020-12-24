@@ -83,6 +83,7 @@ var AppComponent = /** @class */ (function () {
         this.pause = false;
         this.canGoOppositeDirection = true;
         this.highscore = "loading...";
+        this.highscoreName = "";
         this.highscoreColour = "white";
         this.highscoreColourChange = true;
         this.beatenHighscore = false;
@@ -92,6 +93,8 @@ var AppComponent = /** @class */ (function () {
         this.heightPadding = 0;
         this.highscoreGetCallback = function (response) {
             _this.highscore = JSON.parse(response)['highscore'];
+            _this.highscoreName = JSON.parse(response)['name'];
+            console.log(_this.highscoreName);
         };
         this.gameLoop = function () {
             if (!_this.pause) {
@@ -277,6 +280,11 @@ var AppComponent = /** @class */ (function () {
         };
         this.eatFood = function (followers) {
             _this.score += 3 * _this.multiplier;
+            if (_this.score % 3 != 0) {
+                while (true) {
+                    alert("Stop hacking you absolute pleb! Cheaters never truly win.");
+                }
+            }
             _this.checkForHighscore();
             var timeElapsed = Date.now() - _this.multiplierTimer;
             if (timeElapsed < _this.multiplierExpiry) {
@@ -419,13 +427,13 @@ var AppComponent = /** @class */ (function () {
             }
         }
         this.ctx.font = "40px Times New Roman";
-        this.ctx.fillText("Global Highscore: " + this.highscore, window.innerWidth - window.innerWidth * 0.6, 55);
-        var highscoreText = "Global Highscore: " + this.highscore;
+        var highscoreText = "Global Highscore: " + this.highscore + " - " + this.highscoreName;
+        this.ctx.fillText(highscoreText, window.innerWidth - window.innerWidth * 0.7, 55);
         var textLength = this.ctx.measureText(highscoreText);
-        this.ctx.fillRect(window.innerWidth - window.innerWidth * 0.6, 65, textLength.width, 5);
+        this.ctx.fillRect(window.innerWidth - window.innerWidth * 0.7, 65, textLength.width, 5);
     };
     AppComponent.prototype.updateHighscore = function () {
-        var url = "https://ubu6p7l7be.execute-api.us-east-1.amazonaws.com/Production/updatehighscore?highscore=" + this.score;
+        var url = "https://ubu6p7l7be.execute-api.us-east-1.amazonaws.com/Production/updatehighscore?highscore=" + this.score + "&name=" + this.highscoreName;
         // create a new XMLHttpRequest
         var xhr = new XMLHttpRequest();
         // open the request with the verb and the url
@@ -434,8 +442,17 @@ var AppComponent = /** @class */ (function () {
         xhr.send();
     };
     AppComponent.prototype.checkForHighscore = function () {
+        var _this = this;
         if (this.score > this.highscore) {
             this.highscore = this.score;
+            if (this.beatenHighscore == false) {
+                this.pause = true;
+                this.highscoreName = prompt("Oh legendary one, please give a name for the highscore leaderboards");
+                alert("resuming in 3 seconds, get ready!");
+                setTimeout(function () {
+                    _this.pause = false;
+                }, 3000);
+            }
             this.beatenHighscore = true;
         }
     };
