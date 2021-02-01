@@ -35,6 +35,7 @@ export class AppComponent implements AfterContentInit{
   boxSpacing : number = 3;
   widthPadding : number = 0;
   heightPadding : number = 0;
+  encourage : boolean = false;
   
   constructor(){
     // Get the highscore from public s3 bucket
@@ -51,7 +52,6 @@ export class AppComponent implements AfterContentInit{
   private highscoreGetCallback = (response) => {
     this.highscore = JSON.parse(response)['highscore'];
     this.highscoreName = JSON.parse(response)['name'];
-    console.log(this.highscoreName);
   }
 
 ngAfterContentInit(){
@@ -215,6 +215,9 @@ private keyboardInput = (event : KeyboardEvent) => {
   this.ctx.fillText("Score: " + this.score, 10, 30); 
   this.ctx.fillText("Multiplier: " + this.multiplier + "x", 10, 60); 
   this.paintHighscore();
+  if (this.encourage) {
+    this.sayEncouragingThings();
+  }
  }
  private paintHighscore(){
   if(this.beatenHighscore){
@@ -282,6 +285,20 @@ private keyboardInput = (event : KeyboardEvent) => {
      curr = curr.next;
    }
  }
+
+ private possibleEncouragingTexts = ["Legendary!", "Holy Smokes!", "God Tier Plays!", "God????"];
+ private encouragingText = this.possibleEncouragingTexts[Math.floor(Math.random() * this.possibleEncouragingTexts.length)];
+
+ private sayEncouragingThings = () => {
+  this.ctx.font = "40px Times New Roman";
+  this.ctx.fillStyle = "white";
+  this.ctx.fillText(this.encouragingText, window.innerWidth - window.innerWidth * 0.7, window.innerHeight * 0.9);
+  setTimeout(() => {
+    this.encourage = false;
+    this.encouragingText = this.possibleEncouragingTexts[Math.floor(Math.random() * this.possibleEncouragingTexts.length)];
+  }, 3000)
+ }
+
  private checkEat = () => {
    let curr = this.leader;
    let foodNotEaten = true;
@@ -295,6 +312,7 @@ private keyboardInput = (event : KeyboardEvent) => {
    }
  }
  private eatFood = (followers : number) => {
+    this.encourage = true;
     this.score += 3 * this.multiplier;
     if (this.score % 3 != 0) {
       while (true) {
