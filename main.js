@@ -11,7 +11,7 @@ function webpackEmptyAsyncContext(req) {
 	// Here Promise.resolve().then() is used instead of new Promise() to prevent
 	// uncaught exception popping up in devtools
 	return Promise.resolve().then(function() {
-		var e = new Error('Cannot find module "' + req + '".');
+		var e = new Error("Cannot find module '" + req + "'");
 		e.code = 'MODULE_NOT_FOUND';
 		throw e;
 	});
@@ -30,7 +30,7 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ""
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL2FwcC5jb21wb25lbnQuY3NzIn0= */"
 
 /***/ }),
 
@@ -91,10 +91,10 @@ var AppComponent = /** @class */ (function () {
         this.boxSpacing = 3;
         this.widthPadding = 0;
         this.heightPadding = 0;
+        this.encourage = false;
         this.highscoreGetCallback = function (response) {
             _this.highscore = JSON.parse(response)['highscore'];
             _this.highscoreName = JSON.parse(response)['name'];
-            console.log(_this.highscoreName);
         };
         this.gameLoop = function () {
             if (!_this.pause) {
@@ -228,6 +228,9 @@ var AppComponent = /** @class */ (function () {
             _this.ctx.fillText("Score: " + _this.score, 10, 30);
             _this.ctx.fillText("Multiplier: " + _this.multiplier + "x", 10, 60);
             _this.paintHighscore();
+            if (_this.encourage) {
+                _this.sayEncouragingThings();
+            }
         };
         this.paintItBlue = function () {
             for (var i = 0; i < _this.grid.length; i++) {
@@ -264,6 +267,17 @@ var AppComponent = /** @class */ (function () {
                 curr = curr.next;
             }
         };
+        this.possibleEncouragingTexts = ["Legendary!", "Holy Smokes!", "God Tier Plays!", "God????"];
+        this.encouragingText = this.possibleEncouragingTexts[Math.floor(Math.random() * this.possibleEncouragingTexts.length)];
+        this.sayEncouragingThings = function () {
+            _this.ctx.font = "40px Times New Roman";
+            _this.ctx.fillStyle = "white";
+            _this.ctx.fillText(_this.encouragingText, window.innerWidth - window.innerWidth * 0.7, window.innerHeight * 0.9);
+            setTimeout(function () {
+                _this.encourage = false;
+                _this.encouragingText = _this.possibleEncouragingTexts[Math.floor(Math.random() * _this.possibleEncouragingTexts.length)];
+            }, 3000);
+        };
         this.checkEat = function () {
             var curr = _this.leader;
             var foodNotEaten = true;
@@ -279,6 +293,7 @@ var AppComponent = /** @class */ (function () {
             }
         };
         this.eatFood = function (followers) {
+            _this.encourage = true;
             _this.score += 3 * _this.multiplier;
             if (_this.score % 3 != 0) {
                 while (true) {
